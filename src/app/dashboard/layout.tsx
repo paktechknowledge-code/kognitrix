@@ -5,7 +5,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useUser } from "@/hooks/useUser";
 import { useCredits } from "@/hooks/useCredits";
-import { useEffect } from "react";
 import {
   LayoutDashboard, Zap, BarChart3, CreditCard, Key,
   Plug, Settings, HelpCircle, Menu, X, LogOut, ChevronRight, Activity,
@@ -34,16 +33,6 @@ export default function DashboardLayout({
   const { user, profile } = useUser();
   const { balance, fetchBalance } = useCredits(user?.id);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  useEffect(() => {
-    fetchBalance();
-  }, [fetchBalance]);
-
-  const handleSignOut = async () => {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    window.location.href = "/";
-  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -141,8 +130,14 @@ export default function DashboardLayout({
               </div>
             </div>
             <button
-              onClick={handleSignOut}
-              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-primary/5 rounded-lg transition-colors"
+              type="button"
+              onClick={() => {
+                const supabase = createClient();
+                supabase.auth.signOut().then(() => {
+                  window.location.href = "/login";
+                });
+              }}
+              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-primary/5 rounded-lg transition-colors cursor-pointer"
             >
               <LogOut className="w-4 h-4" />
               Sign Out

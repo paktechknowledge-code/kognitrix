@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 export function useCredits(userId: string | undefined) {
@@ -11,14 +11,22 @@ export function useCredits(userId: string | undefined) {
     if (!userId) return;
     setLoading(true);
     const supabase = createClient();
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("profiles")
       .select("credits_balance")
       .eq("id", userId)
       .single();
     if (data) setBalance(data.credits_balance);
+    if (error) console.error("fetchBalance error:", error.message);
     setLoading(false);
   }, [userId]);
+
+  // Auto-fetch when userId becomes available
+  useEffect(() => {
+    if (userId) {
+      fetchBalance();
+    }
+  }, [userId, fetchBalance]);
 
   return { balance, loading, fetchBalance, setBalance };
 }

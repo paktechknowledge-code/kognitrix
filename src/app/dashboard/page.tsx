@@ -36,10 +36,6 @@ export default function DashboardPage() {
   });
 
   useEffect(() => {
-    fetchBalance();
-  }, [fetchBalance]);
-
-  useEffect(() => {
     if (!user?.id) return;
 
     async function fetchUsage() {
