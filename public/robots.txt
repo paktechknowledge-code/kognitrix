@@ -4,4 +4,4 @@ Disallow: /dashboard/
 Disallow: /api/
 Disallow: /callback
 
-Sitemap: https://kognitrix.ai/sitemap.xml
+Sitemap: https://kognitrix.vercel.app/sitemap.xml
