@@ -45,7 +45,7 @@ export default function DashboardPage() {
         .select("id, service_id, credits_used, status, channel, created_at")
         .eq("user_id", user!.id)
         .order("created_at", { ascending: false })
-        .limit(10);
+        .limit(3);
 
       const { count } = await supabase
         .from("usage_logs")
