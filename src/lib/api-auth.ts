@@ -34,7 +34,14 @@ export async function authenticateApiRequest(
     throw new ApiError(401, "Invalid API key");
   }
 
-  return { user: profile as Profile, channel };
+  // Allow caller to override channel via header (e.g. web dashboard sends X-Channel: web)
+  const channelOverride = request.headers.get("X-Channel") as AccessChannel | null;
+  const resolvedChannel: AccessChannel =
+    channelOverride && ["web", "api", "mcp"].includes(channelOverride)
+      ? channelOverride
+      : channel;
+
+  return { user: profile as Profile, channel: resolvedChannel };
 }
 
 export function checkCredits(user: Profile, requiredCredits: number): void {

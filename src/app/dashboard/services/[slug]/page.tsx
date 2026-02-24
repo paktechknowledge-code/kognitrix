@@ -81,6 +81,7 @@ export default function ServicePlaygroundPage() {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${(await getApiKey())}`,
+          "X-Channel": "web",
         },
         body: JSON.stringify(body),
       });
