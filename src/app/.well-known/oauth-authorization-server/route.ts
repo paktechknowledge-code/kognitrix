@@ -9,7 +9,7 @@ export async function GET() {
       registration_endpoint: "https://kognitrix.vercel.app/api/oauth/register",
       token_endpoint_auth_methods_supported: ["none"],
       grant_types_supported: ["urn:ietf:params:oauth:grant-type:token-exchange"],
-      response_types_supported: ["token"],
+      response_types_supported: ["code", "token"],
       scopes_supported: [],
       bearer_token_instructions: "Get your API key from https://kognitrix.vercel.app/dashboard and pass it as: Authorization: Bearer kgx_live_...",
     },

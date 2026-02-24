@@ -7,7 +7,7 @@ export async function POST() {
       client_name: "Kognitrix AI MCP",
       token_endpoint_auth_method: "none",
       grant_types: ["urn:ietf:params:oauth:grant-type:token-exchange"],
-      response_types: ["token"],
+      response_types: ["code", "token"],
       redirect_uris: ["https://kognitrix.vercel.app/dashboard"],
     },
     {
