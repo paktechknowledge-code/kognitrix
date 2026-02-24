@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Profile } from "@/types";
 import type { User } from "@supabase/supabase-js";
@@ -9,6 +9,8 @@ export function useUser() {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  // Keep a ref so we never clear state due to a transient network failure
+  const lastKnownUser = useRef<User | null>(null);
 
   useEffect(() => {
     const supabase = createClient();
@@ -25,6 +27,7 @@ export function useUser() {
     async function init() {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
+        lastKnownUser.current = session.user;
         setUser(session.user);
         await fetchProfile(session.user);
       }
@@ -35,21 +38,26 @@ export function useUser() {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event: string, session: any) => {
-        // Only update state on explicit sign-in/sign-out events
-        // Ignore TOKEN_REFRESHED failures and other transient events
-        // that can happen when Supabase is temporarily unreachable
-        if (event === "SIGNED_IN" || event === "USER_UPDATED") {
+        if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "USER_UPDATED") {
           const u = session?.user ?? null;
-          setUser(u);
-          if (u) await fetchProfile(u);
+          if (u) {
+            lastKnownUser.current = u;
+            setUser(u);
+            await fetchProfile(u);
+          }
         } else if (event === "SIGNED_OUT") {
-          // Only clear state if there's genuinely no session cookie
-          // (i.e., user explicitly signed out, not a network failure)
-          const { data: { session: currentSession } } = await supabase.auth.getSession();
-          if (!currentSession) {
+          // Only truly sign out if we have no last known user cookie
+          // This prevents MCP/API calls from wiping the UI state
+          const hasCookie = document.cookie
+            .split(";")
+            .some((c) => c.trim().startsWith("sb-") && c.includes("-auth-token="));
+
+          if (!hasCookie) {
+            lastKnownUser.current = null;
             setUser(null);
             setProfile(null);
           }
+          // Otherwise ignore — likely a transient token refresh failure
         }
       }
     );
