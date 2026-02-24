@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useUser } from "@/hooks/useUser";
-import { useCredits } from "@/hooks/useCredits";
+import { useCredits } from "@/context/CreditsContext";
 import { createClient } from "@/lib/supabase/client";
 import { CREDIT_PACKS, PLANS } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,7 +21,7 @@ interface Transaction {
 
 export default function BillingPage() {
   const { user, profile } = useUser();
-  const { balance, fetchBalance } = useCredits(user?.id);
+  const { balance, fetchBalance } = useCredits();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
 
   useEffect(() => {

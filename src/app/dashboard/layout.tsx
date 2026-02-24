@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useUser } from "@/hooks/useUser";
-import { useCredits } from "@/hooks/useCredits";
+import { CreditsProvider, useCredits } from "@/context/CreditsContext";
 import {
   LayoutDashboard, Zap, BarChart3, CreditCard, Key,
   Plug, Settings, HelpCircle, Menu, X, LogOut, ChevronRight, Activity,
@@ -28,9 +28,28 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const pathname = usePathname();
   const { user, profile } = useUser();
-  const { balance, fetchBalance } = useCredits(user?.id);
+
+  return (
+    <CreditsProvider userId={user?.id}>
+      <DashboardShell user={user} profile={profile}>
+        {children}
+      </DashboardShell>
+    </CreditsProvider>
+  );
+}
+
+function DashboardShell({
+  user,
+  profile,
+  children,
+}: {
+  user: any;
+  profile: any;
+  children: React.ReactNode;
+}) {
+  const pathname = usePathname();
+  const { balance } = useCredits();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (

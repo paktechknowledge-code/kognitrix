@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useUser } from "@/hooks/useUser";
-import { useCredits, broadcastCreditsUpdate } from "@/hooks/useCredits";
+import { useCredits, broadcastCreditsUpdate } from "@/context/CreditsContext";
 import { useEffect } from "react";
 import { SERVICES_CONFIG } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,7 +20,7 @@ export default function ServicePlaygroundPage() {
   const service = SERVICES_CONFIG.find((s) => s.slug === slug);
 
   const { user } = useUser();
-  const { balance, fetchBalance } = useCredits(user?.id);
+  const { balance, fetchBalance } = useCredits();
 
   const [prompt, setPrompt] = useState("");
   const [extraField, setExtraField] = useState("");

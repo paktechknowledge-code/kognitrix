@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useUser } from "@/hooks/useUser";
-import { useCredits } from "@/hooks/useCredits";
+import { useCredits } from "@/context/CreditsContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -27,7 +27,7 @@ interface UsageSummary {
 
 export default function DashboardPage() {
   const { user, profile } = useUser();
-  const { balance, fetchBalance } = useCredits(user?.id);
+  const { balance } = useCredits();
   const [usage, setUsage] = useState<UsageSummary>({
     total_requests: 0,
     total_credits: 0,
