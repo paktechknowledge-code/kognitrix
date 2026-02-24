@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const SECURITY_HEADERS = {
+const SECURITY_HEADERS: Record<string, string> = {
   "X-Content-Type-Options": "nosniff",
   "X-Frame-Options": "DENY",
   "X-XSS-Protection": "1; mode=block",
@@ -9,13 +9,6 @@ const SECURITY_HEADERS = {
   "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
   "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
 };
-
-function applySecurityHeaders(response: NextResponse) {
-  for (const [key, value] of Object.entries(SECURITY_HEADERS)) {
-    response.headers.set(key, value);
-  }
-  return response;
-}
 
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
@@ -29,13 +22,10 @@ export async function middleware(request: NextRequest) {
           return request.cookies.getAll();
         },
         setAll(cookiesToSet) {
-          // Apply cookies to the request
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value)
           );
-          // Recreate response with updated request so cookies propagate
           supabaseResponse = NextResponse.next({ request });
-          // Apply the session cookies to the response
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options)
           );
@@ -44,10 +34,17 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  // IMPORTANT: must call getUser() to refresh session cookies
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // Use getUser() which validates with Supabase server (more secure)
+  // Falls back to session check to avoid unnecessary logouts on network errors
+  let user = null;
+  try {
+    const { data } = await supabase.auth.getUser();
+    user = data.user;
+  } catch {
+    // Network error — check local session as fallback to avoid false logouts
+    const { data } = await supabase.auth.getSession();
+    user = data.session?.user ?? null;
+  }
 
   const pathname = request.nextUrl.pathname;
 
@@ -56,27 +53,32 @@ export async function middleware(request: NextRequest) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     url.searchParams.set("redirect", pathname);
-    return applySecurityHeaders(NextResponse.redirect(url));
+    const redirectResponse = NextResponse.redirect(url);
+    Object.entries(SECURITY_HEADERS).forEach(([k, v]) =>
+      redirectResponse.headers.set(k, v)
+    );
+    return redirectResponse;
   }
 
   // Redirect logged-in users away from auth pages
   if ((pathname === "/login" || pathname === "/signup") && user) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
-    return applySecurityHeaders(NextResponse.redirect(url));
+    const redirectResponse = NextResponse.redirect(url);
+    Object.entries(SECURITY_HEADERS).forEach(([k, v]) =>
+      redirectResponse.headers.set(k, v)
+    );
+    return redirectResponse;
   }
 
-  return applySecurityHeaders(supabaseResponse);
+  // Apply security headers to normal response
+  Object.entries(SECURITY_HEADERS).forEach(([k, v]) =>
+    supabaseResponse.headers.set(k, v)
+  );
+
+  return supabaseResponse;
 }
 
 export const config = {
-  matcher: [
-    /*
-     * Only run middleware on dashboard and auth pages.
-     * Exclude API routes — they use Bearer token auth, not cookies.
-     */
-    "/dashboard/:path*",
-    "/login",
-    "/signup",
-  ],
+  matcher: ["/dashboard/:path*", "/login", "/signup"],
 };
