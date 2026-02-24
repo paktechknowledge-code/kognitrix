@@ -4,7 +4,7 @@ import type { AccessChannel } from "@/types";
 
 interface DeductCreditsParams {
   userId: string;
-  serviceId: string; // slug like "content-generator"
+  serviceId: string; // UUID or slug like "content-generator"
   creditsUsed: number;
   requestPayload: Record<string, unknown>;
   responseTokens: number;
@@ -16,25 +16,28 @@ interface DeductCreditsParams {
   costToUs: number;
 }
 
-// Cache service slug -> UUID mapping (populated on first call)
+// UUID regex
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+// Cache service slug -> UUID mapping
 let serviceCache: Record<string, string> | null = null;
 
-async function getServiceUuid(
+async function resolveServiceUuid(
   supabase: ReturnType<typeof createServiceClient>,
-  slug: string
+  serviceId: string
 ): Promise<string | null> {
+  // Already a UUID — use directly
+  if (UUID_REGEX.test(serviceId)) return serviceId;
+
+  // It's a slug — look up the UUID
   if (!serviceCache) {
-    const { data } = await supabase
-      .from("services")
-      .select("id, slug");
+    const { data } = await supabase.from("services").select("id, slug");
     if (data) {
       serviceCache = {};
-      for (const s of data) {
-        serviceCache[s.slug] = s.id;
-      }
+      for (const s of data) serviceCache[s.slug] = s.id;
     }
   }
-  return serviceCache?.[slug] ?? null;
+  return serviceCache?.[serviceId] ?? null;
 }
 
 export async function deductCredits(params: DeductCreditsParams): Promise<{
@@ -44,8 +47,8 @@ export async function deductCredits(params: DeductCreditsParams): Promise<{
   const supabase = createServiceClient();
   const requestId = generateRequestId();
 
-  // Deduct credits atomically
-  const { data: profile, error: updateError } = await supabase.rpc(
+  // Deduct credits atomically via RPC
+  const { data: newBalance, error: updateError } = await supabase.rpc(
     "deduct_credits",
     {
       p_user_id: params.userId,
@@ -57,10 +60,9 @@ export async function deductCredits(params: DeductCreditsParams): Promise<{
     throw new Error(`Failed to deduct credits: ${updateError.message}`);
   }
 
-  // Resolve service slug to UUID
-  const serviceUuid = await getServiceUuid(supabase, params.serviceId);
+  // Resolve service ID to UUID
+  const serviceUuid = await resolveServiceUuid(supabase, params.serviceId);
 
-  // Log usage (only if we have a valid service UUID)
   if (serviceUuid) {
     const { error: logError } = await supabase.from("usage_logs").insert({
       id: requestId,
@@ -81,12 +83,12 @@ export async function deductCredits(params: DeductCreditsParams): Promise<{
       console.error("Failed to insert usage log:", logError.message);
     }
   } else {
-    console.error(`Unknown service slug: ${params.serviceId}`);
+    console.error(`Could not resolve service UUID for: ${params.serviceId}`);
   }
 
   return {
     requestId,
-    newBalance: profile ?? 0,
+    newBalance: newBalance ?? 0,
   };
 }
 

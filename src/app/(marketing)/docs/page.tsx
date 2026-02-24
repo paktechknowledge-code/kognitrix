@@ -33,7 +33,7 @@ export default function DocsPage() {
         <section className="mb-12">
           <h2 className="text-2xl font-bold mb-4">Base URL</h2>
           <pre className="bg-secondary rounded-lg p-4 overflow-x-auto text-sm">
-            <code>{`https://kognitrix.ai/api/v1`}</code>
+            <code>{`https://kognitrix.vercel.app/api/v1`}</code>
           </pre>
         </section>
 
@@ -70,7 +70,7 @@ export default function DocsPage() {
 
           <h3 className="text-lg font-semibold mb-2 mt-6">cURL</h3>
           <pre className="bg-secondary rounded-lg p-4 overflow-x-auto text-sm mb-6">
-            <code>{`curl -X POST https://kognitrix.ai/api/v1/generate/content \\
+            <code>{`curl -X POST https://kognitrix.vercel.app/api/v1/generate/content \\
   -H "Authorization: Bearer kgx_live_your_key_here" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -85,7 +85,7 @@ export default function DocsPage() {
             <code>{`import requests
 
 response = requests.post(
-    "https://kognitrix.ai/api/v1/generate/content",
+    "https://kognitrix.vercel.app/api/v1/generate/content",
     headers={"Authorization": "Bearer kgx_live_your_key_here"},
     json={
         "prompt": "Write a blog post about AI in 2026",
@@ -101,7 +101,7 @@ print(f"Credits remaining: {data['credits_remaining']}")`}</code>
 
           <h3 className="text-lg font-semibold mb-2">JavaScript</h3>
           <pre className="bg-secondary rounded-lg p-4 overflow-x-auto text-sm mb-6">
-            <code>{`const response = await fetch("https://kognitrix.ai/api/v1/generate/content", {
+            <code>{`const response = await fetch("https://kognitrix.vercel.app/api/v1/generate/content", {
   method: "POST",
   headers: {
     "Authorization": "Bearer kgx_live_your_key_here",
@@ -148,7 +148,7 @@ console.log("Credits remaining:", data.credits_remaining);`}</code>
             <code>{`{
   "mcpServers": {
     "kognitrix": {
-      "url": "https://kognitrix.ai/api/mcp",
+      "url": "https://kognitrix.vercel.app/api/mcp",
       "headers": {
         "Authorization": "Bearer kgx_live_your_key_here"
       }
