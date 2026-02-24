@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useUser } from "@/hooks/useUser";
 import { useCredits } from "@/hooks/useCredits";
-import { createClient } from "@/lib/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -35,35 +34,54 @@ export default function DashboardPage() {
     recent_logs: [],
   });
 
-  useEffect(() => {
+  const fetchUsage = useCallback(async () => {
     if (!user?.id) return;
-
-    async function fetchUsage() {
-      const supabase = createClient();
-      const { data: logs } = await supabase
-        .from("usage_logs")
-        .select("id, service_id, credits_used, status, channel, created_at")
-        .eq("user_id", user!.id)
-        .order("created_at", { ascending: false })
-        .limit(3);
-
-      const { count } = await supabase
-        .from("usage_logs")
-        .select("*", { count: "exact", head: true })
-        .eq("user_id", user!.id);
-
-      const totalCredits =
-        logs?.reduce((sum: number, log: { credits_used: number }) => sum + log.credits_used, 0) ?? 0;
-
+    try {
+      const res = await fetch("/api/me/usage?page=0&pageSize=3");
+      if (!res.ok) return;
+      const data = await res.json();
       setUsage({
-        total_requests: count ?? 0,
-        total_credits: totalCredits,
-        recent_logs: logs ?? [],
+        total_requests: data.total ?? 0,
+        total_credits: data.total_credits_used ?? 0,
+        recent_logs: data.logs ?? [],
       });
+    } catch {
+      // Keep existing state on error
     }
-
-    fetchUsage();
   }, [user?.id]);
+
+  // Initial fetch + realtime updates from broadcast
+  useEffect(() => {
+    fetchUsage();
+    const onUpdate = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail?.total_requests != null && detail?.total_credits_used != null) {
+        // Update totals instantly from broadcast payload
+        setUsage((prev) => ({
+          ...prev,
+          total_requests: detail.total_requests,
+          total_credits: detail.total_credits_used,
+          // Prepend new log entry and keep only 3
+          recent_logs: [
+            {
+              id: detail.request_id,
+              service_id: detail.service_id,
+              credits_used: detail.credits_used,
+              status: "success",
+              channel: detail.channel,
+              created_at: detail.created_at,
+            },
+            ...prev.recent_logs,
+          ].slice(0, 3),
+        }));
+      } else {
+        // Fallback: re-fetch from server
+        fetchUsage();
+      }
+    };
+    window.addEventListener("kognitrix:credits-updated", onUpdate);
+    return () => window.removeEventListener("kognitrix:credits-updated", onUpdate);
+  }, [fetchUsage]);
 
   const stats = [
     {

@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useUser } from "@/hooks/useUser";
-import { createClient } from "@/lib/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -34,25 +33,19 @@ export default function UsagePage() {
 
     async function fetchLogs() {
       setLoading(true);
-      const supabase = createClient();
-
-      let query = supabase
-        .from("usage_logs")
-        .select("id, service_id, credits_used, status, channel, latency_ms, model_used, created_at", {
-          count: "exact",
-        })
-        .eq("user_id", user!.id)
-        .order("created_at", { ascending: false })
-        .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
-
-      if (filterChannel) {
-        query = query.eq("channel", filterChannel);
+      try {
+        const params = new URLSearchParams({ page: String(page), pageSize: String(PAGE_SIZE) });
+        if (filterChannel) params.set("channel", filterChannel);
+        const res = await fetch(`/api/me/usage?${params}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        setLogs(data.logs ?? []);
+        setTotal(data.total ?? 0);
+      } catch {
+        // Keep existing state
+      } finally {
+        setLoading(false);
       }
-
-      const { data, count } = await query;
-      setLogs(data ?? []);
-      setTotal(count ?? 0);
-      setLoading(false);
     }
 
     fetchLogs();

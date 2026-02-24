@@ -31,13 +31,22 @@ async function resolveServiceUuid(
 
   // It's a slug — look up the UUID
   if (!serviceCache) {
-    const { data } = await supabase.from("services").select("id, slug");
-    if (data) {
+    const { data, error } = await supabase.from("services").select("id, slug");
+    if (error) {
+      console.error("Failed to load services cache:", error.message);
+    }
+    if (data && data.length > 0) {
       serviceCache = {};
       for (const s of data) serviceCache[s.slug] = s.id;
+    } else {
+      console.error("Services table is empty or inaccessible. Slugs available:", data);
     }
   }
-  return serviceCache?.[serviceId] ?? null;
+  const resolved = serviceCache?.[serviceId] ?? null;
+  if (!resolved) {
+    console.error(`Could not resolve slug "${serviceId}". Cache:`, serviceCache);
+  }
+  return resolved;
 }
 
 export async function deductCredits(params: DeductCreditsParams): Promise<{
@@ -85,6 +94,45 @@ export async function deductCredits(params: DeductCreditsParams): Promise<{
   } else {
     console.error(`Could not resolve service UUID for: ${params.serviceId}`);
   }
+
+  // Get totals for realtime dashboard update
+  const { count: totalRequests } = await supabase
+    .from("usage_logs")
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", params.userId);
+
+  const { data: allLogs } = await supabase
+    .from("usage_logs")
+    .select("credits_used")
+    .eq("user_id", params.userId);
+
+  const totalCreditsUsed = allLogs?.reduce((sum, l) => sum + l.credits_used, 0) ?? 0;
+
+  // Broadcast realtime update so the browser dashboard updates instantly
+  const broadcastChannel = supabase.channel(`user:${params.userId}`);
+  await new Promise<void>((resolve) => {
+    broadcastChannel.subscribe((status: string) => {
+      if (status === "SUBSCRIBED") {
+        broadcastChannel.send({
+          type: "broadcast",
+          event: "credits_updated",
+          payload: {
+            credits_balance: newBalance ?? 0,
+            credits_used: params.creditsUsed,
+            total_requests: totalRequests ?? 0,
+            total_credits_used: totalCreditsUsed,
+            channel: params.channel,
+            request_id: requestId,
+            service_id: serviceUuid || "",
+            created_at: new Date().toISOString(),
+          },
+        }).then(() => {
+          supabase.removeChannel(broadcastChannel);
+          resolve();
+        });
+      }
+    });
+  });
 
   return {
     requestId,

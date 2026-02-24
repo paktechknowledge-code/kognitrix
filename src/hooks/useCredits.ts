@@ -17,34 +17,49 @@ export function useCredits(userId: string | undefined) {
 
   const fetchBalance = useCallback(async () => {
     if (!userId) return;
-    const supabase = createClient();
-    const { data } = await supabase
-      .from("profiles")
-      .select("credits_balance")
-      .eq("id", userId)
-      .single();
-    if (data) setBalance(data.credits_balance);
+    try {
+      const res = await fetch("/api/me");
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data.profile?.credits_balance != null) {
+        setBalance(data.profile.credits_balance);
+      }
+    } catch {
+      // Keep existing balance
+    }
   }, [userId]);
 
-  // Fetch when userId becomes available
+  // Initial fetch
   useEffect(() => {
     if (userId) fetchBalance();
   }, [userId, fetchBalance]);
 
-  // Re-fetch on broadcast event (after service use)
-  useEffect(() => {
-    window.addEventListener(CREDITS_UPDATE_EVENT, fetchBalance);
-    return () => window.removeEventListener(CREDITS_UPDATE_EVENT, fetchBalance);
-  }, [fetchBalance]);
-
-  // Poll every 30s to stay in sync
+  // Realtime via Supabase Broadcast (no RLS — pure pub/sub)
   useEffect(() => {
     if (!userId) return;
-    const interval = setInterval(fetchBalance, 30_000);
-    return () => clearInterval(interval);
-  }, [userId, fetchBalance]);
 
-  // Re-fetch when tab becomes visible again (user switches back to tab)
+    const supabase = createClient();
+    const channel = supabase
+      .channel(`user:${userId}`)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .on("broadcast", { event: "credits_updated" }, (msg: any) => {
+        const payload = msg.payload;
+        if (payload?.credits_balance != null) {
+          setBalance(payload.credits_balance);
+        }
+        // Dispatch with full payload so dashboard page can update totals instantly
+        window.dispatchEvent(
+          new CustomEvent(CREDITS_UPDATE_EVENT, { detail: payload })
+        );
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [userId]);
+
+  // Re-fetch on tab focus
   useEffect(() => {
     const onVisible = () => {
       if (document.visibilityState === "visible" && userId) fetchBalance();

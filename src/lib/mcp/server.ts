@@ -151,16 +151,14 @@ async function executeService(
 ): Promise<McpResponse> {
   checkCredits(user, creditCost);
 
-  const supabase = createServiceClient();
-  const { data: service } = await supabase.from("services").select("id").eq("slug", slug).single();
-
   const startTime = Date.now();
   const { result, tokens, cost } = await serviceFn();
   const latency = Date.now() - startTime;
 
+  // Pass slug directly — credits.ts resolveServiceUuid handles slug→UUID lookup
   const { requestId, newBalance } = await deductCredits({
     userId: user.id,
-    serviceId: service?.id || "",
+    serviceId: slug,
     creditsUsed: creditCost,
     requestPayload: {},
     responseTokens: tokens,
