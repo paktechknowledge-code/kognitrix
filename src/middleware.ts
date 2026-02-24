@@ -34,16 +34,19 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  // Use getUser() which validates with Supabase server (more secure)
-  // Falls back to session check to avoid unnecessary logouts on network errors
+  // Check session — reads from cookie without a network call
+  // getUser() requires a Supabase network round-trip which can fail in edge runtime
   let user = null;
   try {
-    const { data } = await supabase.auth.getUser();
-    user = data.user;
-  } catch {
-    // Network error — check local session as fallback to avoid false logouts
     const { data } = await supabase.auth.getSession();
     user = data.session?.user ?? null;
+  } catch {
+    // If session check fails, allow the request through
+    // rather than force-redirect to login on a network error
+    Object.entries(SECURITY_HEADERS).forEach(([k, v]) =>
+      supabaseResponse.headers.set(k, v)
+    );
+    return supabaseResponse;
   }
 
   const pathname = request.nextUrl.pathname;
