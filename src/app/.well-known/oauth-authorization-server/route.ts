@@ -4,10 +4,11 @@ export async function GET() {
   return Response.json(
     {
       issuer: "https://kognitrix.vercel.app",
+      authorization_endpoint: "https://kognitrix.vercel.app/dashboard",
       token_endpoint: "https://kognitrix.vercel.app/api/mcp",
       token_endpoint_auth_methods_supported: ["none"],
       grant_types_supported: ["urn:ietf:params:oauth:grant-type:token-exchange"],
-      response_types_supported: [],
+      response_types_supported: ["token"],
       scopes_supported: [],
       bearer_token_instructions: "Get your API key from https://kognitrix.vercel.app/dashboard and pass it as: Authorization: Bearer kgx_live_...",
     },
