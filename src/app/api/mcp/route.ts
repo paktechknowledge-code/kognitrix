@@ -22,52 +22,18 @@ export async function POST(request: Request) {
   }
 }
 
-// Discovery endpoint — unauthenticated so Smithery/agents can scan capabilities
-export async function GET(request: Request) {
-  const authHeader = request.headers.get("authorization");
-
-  // If no auth, return public server info for discovery scanners
-  if (!authHeader) {
-    return Response.json(
-      {
-        name: "kognitrix-ai",
-        version: "1.0.0",
-        description: "Kognitrix AI — Intelligence-as-a-Service. AI content, code, image, document, data extraction, and translation services.",
-        protocol: "MCP",
-        protocolVersion: "2024-11-05",
-        auth: {
-          type: "bearer",
-          description: "Get your API key from https://kognitrix.vercel.app/dashboard",
-        },
-        endpoints: { mcp: "/api/mcp" },
-      },
-      {
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-          "Access-Control-Allow-Headers": "Content-Type, Authorization",
-        },
-      }
-    );
-  }
-
-  // Authenticated: return user-specific info
-  try {
-    const { user } = await authenticateApiRequest(request, "mcp");
-    return Response.json(
-      {
-        name: "kognitrix-ai",
-        version: "1.0.0",
-        protocol: "MCP",
-        user: { plan: user.plan_type, credits: user.credits_balance },
-      },
-      {
-        headers: { "Access-Control-Allow-Origin": "*" },
-      }
-    );
-  } catch (error) {
-    return errorResponse(error);
-  }
+export async function GET() {
+  return Response.json({
+    name: "kognitrix-ai",
+    version: "1.0.0",
+    description: "Kognitrix AI MCP Server",
+    protocol: "MCP",
+    protocolVersion: "2024-11-05",
+    auth: {
+      type: "bearer",
+      description: "Get your API key from https://kognitrix.vercel.app/dashboard",
+    },
+  });
 }
 
 export async function OPTIONS() {
