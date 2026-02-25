@@ -16,8 +16,6 @@ function applySecurityHeaders(response: NextResponse) {
 }
 
 function hasSession(request: NextRequest): boolean {
-  // Supabase stores the session in a cookie named sb-<project-ref>-auth-token
-  // Check for any sb-*-auth-token cookie with a value
   for (const cookie of request.cookies.getAll()) {
     if (
       (cookie.name.startsWith("sb-") && cookie.name.endsWith("-auth-token")) ||
