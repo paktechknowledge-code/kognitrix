@@ -49,7 +49,9 @@ export async function GET() {
     }
 
     return NextResponse.json({ user: session.user, profile });
-  } catch {
-    return NextResponse.json({ user: null, profile: null }, { status: 500 });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("/api/me error:", message);
+    return NextResponse.json({ error: message, user: null, profile: null }, { status: 500 });
   }
 }
