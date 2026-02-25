@@ -45,13 +45,27 @@ export default function BillingPage() {
     fetchTransactions();
   }, [user?.id]);
 
-  const handleBuyPack = async (packId: string) => {
-    // In production, this would redirect to Lemon Squeezy checkout
-    alert(`Checkout for ${packId} would open here. Configure Lemon Squeezy variant IDs in types/index.ts to enable.`);
+  const buildCheckoutUrl = (variantId: string) => {
+    const storeSlug = "kognitrix";
+    return `https://${storeSlug}.lemonsqueezy.com/checkout/buy/${variantId}?checkout[custom][user_id]=${user!.id}&checkout[email]=${encodeURIComponent(user!.email!)}&checkout[custom][source]=dashboard`;
   };
 
-  const handleSubscribe = async (planType: string) => {
-    alert(`Subscription checkout for ${planType} plan would open here. Configure Lemon Squeezy variant IDs to enable.`);
+  const handleBuyPack = (packId: string) => {
+    const pack = CREDIT_PACKS.find((p) => p.id === packId);
+    if (!pack?.lemon_squeezy_variant_id) {
+      alert("Payment not configured yet. Please try again later.");
+      return;
+    }
+    window.open(buildCheckoutUrl(pack.lemon_squeezy_variant_id), "_blank");
+  };
+
+  const handleSubscribe = (planType: string) => {
+    const plan = PLANS[planType];
+    if (!plan?.lemon_squeezy_variant_id) {
+      alert("Payment not configured yet. Please try again later.");
+      return;
+    }
+    window.open(buildCheckoutUrl(plan.lemon_squeezy_variant_id), "_blank");
   };
 
   return (
@@ -110,7 +124,7 @@ export default function BillingPage() {
       {/* Subscription Plans */}
       <div>
         <h2 className="text-xl font-bold mb-4">Subscription Plans</h2>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {Object.entries(PLANS)
             .filter(([key]) => key !== "pay_as_you_go")
             .map(([key, plan]) => {

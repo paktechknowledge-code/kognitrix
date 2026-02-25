@@ -176,8 +176,7 @@ console.log("Credits remaining:", data.credits_remaining);`}</code>
               <tbody className="text-muted-foreground">
                 <tr className="border-b border-border"><td className="p-3">Free Trial</td><td className="p-3">5</td><td className="p-3">50</td></tr>
                 <tr className="border-b border-border"><td className="p-3">Starter</td><td className="p-3">30</td><td className="p-3">1,000</td></tr>
-                <tr className="border-b border-border"><td className="p-3">Pro</td><td className="p-3">60</td><td className="p-3">5,000</td></tr>
-                <tr><td className="p-3">Enterprise</td><td className="p-3">120</td><td className="p-3">20,000</td></tr>
+                <tr><td className="p-3">Pro</td><td className="p-3">60</td><td className="p-3">5,000</td></tr>
               </tbody>
             </table>
           </div>

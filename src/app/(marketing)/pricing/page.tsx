@@ -43,16 +43,6 @@ const plans = [
     cta: "Subscribe",
     popular: true,
   },
-  {
-    name: "Enterprise",
-    price: "$199",
-    period: "/month",
-    credits: "5,000 credits/mo",
-    description: "For teams and heavy API users",
-    features: ["All 6 AI services", "Web + API + MCP access", "120 req/min rate limit", "20,000 requests/day", "Priority support", "Usage analytics", "Dedicated account manager"],
-    cta: "Subscribe",
-    popular: false,
-  },
 ];
 
 const creditPacks = [
@@ -80,7 +70,7 @@ export default function PricingPage() {
 
           {/* Monthly Plans */}
           <h2 className="text-2xl font-bold mb-6 text-center">Monthly Plans</h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
             {plans.map((plan) => (
               <Card key={plan.name} className={`relative ${plan.popular ? "border-primary shadow-lg shadow-primary/10" : ""}`}>
                 {plan.popular && (

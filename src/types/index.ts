@@ -1,4 +1,4 @@
-export type PlanType = 'free_trial' | 'starter' | 'pro' | 'enterprise' | 'pay_as_you_go';
+export type PlanType = 'free_trial' | 'starter' | 'pro' | 'pay_as_you_go';
 export type ServiceCategory = 'content' | 'code' | 'data' | 'image' | 'legal' | 'seo' | 'workflow';
 export type UsageStatus = 'success' | 'error' | 'rate_limited';
 export type TransactionType = 'credit_purchase' | 'subscription' | 'refund';
@@ -145,7 +145,7 @@ export const PLANS: Record<string, PlanInfo> = {
     price_usd: 29,
     requests_per_min: 30,
     requests_per_day: 1000,
-    lemon_squeezy_variant_id: '',
+    lemon_squeezy_variant_id: process.env.NEXT_PUBLIC_LS_STARTER_VARIANT_ID || '',
   },
   pro: {
     type: 'pro',
@@ -154,16 +154,7 @@ export const PLANS: Record<string, PlanInfo> = {
     price_usd: 79,
     requests_per_min: 60,
     requests_per_day: 5000,
-    lemon_squeezy_variant_id: '',
-  },
-  enterprise: {
-    type: 'enterprise',
-    name: 'Enterprise',
-    credits_per_month: 5000,
-    price_usd: 199,
-    requests_per_min: 120,
-    requests_per_day: 20000,
-    lemon_squeezy_variant_id: '',
+    lemon_squeezy_variant_id: process.env.NEXT_PUBLIC_LS_PRO_VARIANT_ID || '',
   },
   pay_as_you_go: {
     type: 'pay_as_you_go',
@@ -177,10 +168,10 @@ export const PLANS: Record<string, PlanInfo> = {
 };
 
 export const CREDIT_PACKS: CreditPack[] = [
-  { id: 'starter_pack', name: 'Starter Pack', credits: 100, price_usd: 8, lemon_squeezy_variant_id: '' },
-  { id: 'growth_pack', name: 'Growth Pack', credits: 500, price_usd: 35, lemon_squeezy_variant_id: '' },
-  { id: 'pro_pack', name: 'Pro Pack', credits: 1000, price_usd: 60, lemon_squeezy_variant_id: '' },
-  { id: 'mega_pack', name: 'Mega Pack', credits: 2000, price_usd: 100, lemon_squeezy_variant_id: '' },
+  { id: 'starter_pack', name: 'Starter Pack', credits: 100, price_usd: 8, lemon_squeezy_variant_id: process.env.NEXT_PUBLIC_LS_PACK_100_VARIANT_ID || '' },
+  { id: 'growth_pack', name: 'Growth Pack', credits: 500, price_usd: 35, lemon_squeezy_variant_id: process.env.NEXT_PUBLIC_LS_PACK_500_VARIANT_ID || '' },
+  { id: 'pro_pack', name: 'Pro Pack', credits: 1000, price_usd: 60, lemon_squeezy_variant_id: process.env.NEXT_PUBLIC_LS_PACK_1000_VARIANT_ID || '' },
+  { id: 'mega_pack', name: 'Mega Pack', credits: 2000, price_usd: 100, lemon_squeezy_variant_id: process.env.NEXT_PUBLIC_LS_PACK_2000_VARIANT_ID || '' },
 ];
 
 export const SERVICES_CONFIG: Omit<Service, 'id' | 'created_at' | 'updated_at'>[] = [

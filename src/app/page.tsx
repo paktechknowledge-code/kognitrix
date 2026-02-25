@@ -216,12 +216,11 @@ export default function HomePage() {
               <h2 className="text-3xl sm:text-4xl font-bold mb-3">Simple, Transparent Pricing</h2>
               <p className="text-muted-foreground">Start free. Pay as you grow. No hidden fees.</p>
             </div>
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
               {[
                 { name: "Free Trial", price: "$0", credits: "50 credits", features: ["All 6 services", "Web + API + MCP", "5 req/min"], popular: false },
                 { name: "Starter", price: "$29/mo", credits: "500 credits/mo", features: ["All 6 services", "30 req/min", "Email support"], popular: false },
                 { name: "Pro", price: "$79/mo", credits: "1,500 credits/mo", features: ["All 6 services", "60 req/min", "Priority support"], popular: true },
-                { name: "Enterprise", price: "$199/mo", credits: "5,000 credits/mo", features: ["All 6 services", "120 req/min", "Dedicated manager"], popular: false },
               ].map((p) => (
                 <Card key={p.name} className={`relative ${p.popular ? "border-primary/50 glow-sm" : ""}`}>
                   {p.popular && <div className="absolute -top-3 left-1/2 -translate-x-1/2"><Badge className="gradient-bg border-0 shadow-lg shadow-primary/20">Most Popular</Badge></div>}
