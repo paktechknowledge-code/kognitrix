@@ -105,7 +105,7 @@ export default function HomePage() {
               </div>
               <div className="p-5 mono text-sm space-y-2">
                 <div className="text-muted-foreground">
-                  <span className="text-cyan-400">$</span> curl -X POST https://kognitrix.vercel.app/api/v1/generate/content \
+                  <span className="text-cyan-400">$</span> curl -X POST https://kognitrix.com/api/v1/generate/content \
                 </div>
                 <div className="text-muted-foreground pl-4">
                   -H &quot;Authorization: Bearer kgx_live_...&quot; \

@@ -31,7 +31,7 @@ export async function GET() {
     protocolVersion: "2024-11-05",
     auth: {
       type: "bearer",
-      description: "Get your API key from https://kognitrix.vercel.app/dashboard",
+      description: "Get your API key from https://kognitrix.com/dashboard",
     },
   });
 }

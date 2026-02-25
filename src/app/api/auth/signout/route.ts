@@ -8,7 +8,7 @@ export async function POST() {
   // supabase.auth.signOut() times out in some environments — clearing cookies is sufficient
   const allCookies = cookieStore.getAll();
   const response = NextResponse.redirect(
-    new URL("/login", process.env.NEXT_PUBLIC_APP_URL || "https://kognitrix.vercel.app"),
+    new URL("/login", process.env.NEXT_PUBLIC_APP_URL || "https://kognitrix.com"),
     { status: 302 }
   );
 

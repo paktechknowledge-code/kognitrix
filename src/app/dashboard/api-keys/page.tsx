@@ -130,7 +130,7 @@ export default function ApiKeysPage() {
               <Badge variant="outline">cURL</Badge>
             </h3>
             <pre className="p-4 rounded-lg bg-secondary/50 border border-border text-xs overflow-x-auto">
-{`curl -X POST https://kognitrix.vercel.app/api/v1/generate/content \\
+{`curl -X POST https://kognitrix.com/api/v1/generate/content \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{"prompt": "Write a blog post about AI"}'`}
@@ -145,7 +145,7 @@ export default function ApiKeysPage() {
 {`import requests
 
 response = requests.post(
-    "https://kognitrix.vercel.app/api/v1/generate/content",
+    "https://kognitrix.com/api/v1/generate/content",
     headers={"Authorization": "Bearer YOUR_API_KEY"},
     json={"prompt": "Write a blog post about AI"}
 )
@@ -158,7 +158,7 @@ print(response.json())`}
               <Badge variant="outline">JavaScript</Badge>
             </h3>
             <pre className="p-4 rounded-lg bg-secondary/50 border border-border text-xs overflow-x-auto">
-{`const res = await fetch("https://kognitrix.vercel.app/api/v1/generate/content", {
+{`const res = await fetch("https://kognitrix.com/api/v1/generate/content", {
   method: "POST",
   headers: {
     "Authorization": "Bearer YOUR_API_KEY",

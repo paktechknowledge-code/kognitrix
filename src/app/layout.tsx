@@ -52,7 +52,7 @@ export const metadata: Metadata = {
   verification: {
     google: "eDw2fWEXVf7ksLhgsc25Dxh4O_h3lT81o7SH6rKQGpQ",
   },
-  metadataBase: new URL("https://kognitrix.vercel.app"),
+  metadataBase: new URL("https://kognitrix.com"),
   robots: {
     index: true,
     follow: true,
@@ -83,8 +83,8 @@ export default function RootLayout({
               name: "Kognitrix AI",
               description:
                 "AI-powered services platform for developers and AI agents",
-              url: "https://kognitrix.vercel.app",
-              logo: "https://kognitrix.vercel.app/logo.png",
+              url: "https://kognitrix.com",
+              logo: "https://kognitrix.com/logo.png",
               foundingDate: "2026",
               founders: [
                 {

@@ -30,7 +30,7 @@ export default function McpSetupPage() {
     fetchKey();
   }, [user?.id]);
 
-  const mcpEndpoint = "https://kognitrix.vercel.app/api/mcp";
+  const mcpEndpoint = "https://kognitrix.com/api/mcp";
 
   const mcpConfig = JSON.stringify(
     {
