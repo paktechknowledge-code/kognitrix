@@ -41,6 +41,9 @@ export async function POST(request: Request) {
                 source: "dashboard",
               },
             },
+            product_options: {
+              redirect_url: `${process.env.NEXT_PUBLIC_APP_URL || "https://kognitrix.com"}/dashboard/billing`,
+            },
           },
           relationships: {
             store: {
